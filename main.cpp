@@ -20,17 +20,41 @@ vector<string> split(const string &s, char delim) {
   return elems;
 }
 
-int func(vector<string> files){
-    cout << "in func()" << endl;
+bool getPermission(string fileName){
+    cout << "Do you really want to delete " << fileName << " (Y/N): ";
+    string answer;
+    cin >> answer;
+    if (answer != "Y")
+        return false;
+    else
+        return true;
+}
+
+int func(vector<string> files, bool toDeleteScilently, bool ToDeleteDirectory){
     struct dirent *entry;
     string f;
+    bool removed = false;
+    bool isDirectory = !strstr(f.c_str(),".");
+    bool allowed = true;
 
     for (int i = 0; i < files.size(); i++) {
         f = files[i];
-        cout << f << endl;
-        entry = readdir(opendir(f.c_str()));
-        if(entry->d_type == 4){
-            cout << "it`s dir";
+        if (!toDeleteScilently){
+            allowed = (getPermission(f));
+        }
+        if (!allowed){
+            break;
+        }
+
+        if (!strstr(f.c_str(),".")){ //  if the name don`t contain "." --> is directory
+            if (ToDeleteDirectory){ //if it is allowed to delete the directory
+                remove(f.c_str());
+                cout << "Deleting" << endl;
+            }
+        }
+        else{
+            remove(f.c_str());
+            cout << "Deleting" << endl;
         }
     }
 }
@@ -74,7 +98,7 @@ int main()
 
     printVector(FILES);
 
-    func(FILES);
+    func(FILES, toDeleteScilently, ToDeleteDirectory);
 
     return 0;
 }
